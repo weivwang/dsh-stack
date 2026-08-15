@@ -1,0 +1,11 @@
+import { A as ApplyStackResult, B as StackPlan, C as StackError, D as applyStack, E as ApplyRuntime, F as ExportStackOptions, H as StackSecretReference, I as STACK_FORMAT, L as STACK_FORMAT_VERSION, M as DEFAULT_MAX_PATCH_BYTES, N as DEFAULT_MAX_STACK_BYTES, O as previewApply, P as DshStack, R as StackBundle, S as stackShareability, T as sha256, U as StackSource, V as StackProfilePatch, _ as isEmptyPatch, a as classifySpecifier, b as exportStack, c as isExactRegistryVersion, d as readInstalledProfile, f as resolveDshHome, g as hydratePatch, h as assertPatchSyntax, i as validateStack, j as BundleSourceKind, k as ApplyStackOptions, l as isPinnedGitSpecifier, m as planStack, n as parseStackJson, o as discoverHarnessVersion, p as formatPlan, r as sealStack, s as installedPackageVersion, t as computeStackIntegrity, u as profileDirectory, v as redactPatch, w as canonicalJson, x as formatStackJson, y as loadStackSource, z as StackDependencyChange } from "./core-BLMHrwcQ.js";
+import { Context } from "@deepseek-ai/cordis";
+//#region src/index.d.ts
+/** Cordis plugin name shown by Harness diagnostics. */
+declare const name = "dsh-stack";
+/** Harness services required by the model-facing inspector. */
+declare const inject: string[];
+/** Register the secret-safe profile inspection tool. */
+declare function apply(ctx: Context): void;
+//#endregion
+export { type ApplyRuntime, type ApplyStackOptions, type ApplyStackResult, type BundleSourceKind, DEFAULT_MAX_PATCH_BYTES, DEFAULT_MAX_STACK_BYTES, type DshStack, type ExportStackOptions, STACK_FORMAT, STACK_FORMAT_VERSION, type StackBundle, type StackDependencyChange, StackError, type StackPlan, type StackProfilePatch, type StackSecretReference, type StackSource, apply, applyStack, assertPatchSyntax, canonicalJson, classifySpecifier, computeStackIntegrity, discoverHarnessVersion, exportStack, formatPlan, formatStackJson, hydratePatch, inject, installedPackageVersion, isEmptyPatch, isExactRegistryVersion, isPinnedGitSpecifier, loadStackSource, name, parseStackJson, planStack, previewApply, profileDirectory, readInstalledProfile, redactPatch, resolveDshHome, sealStack, sha256, stackShareability, validateStack };
