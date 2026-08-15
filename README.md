@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/hero.svg" alt="dsh-stack — Ship the environment, not the setup guide" width="100%">
+  <img src="https://raw.githubusercontent.com/weivwang/dsh-stack/main/assets/hero.svg" alt="dsh-stack — Ship the environment, not the setup guide" width="100%">
 </p>
 
 <h1 align="center">dsh-stack</h1>
@@ -36,6 +36,10 @@ The result is a small JSON Stackfile that can live beside a project, release, be
 
 ## From working profile to verified replica
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/weivwang/dsh-stack/main/assets/demo.gif" alt="Install, export, inspect, plan, apply, and verify a dsh-stack profile" width="100%">
+</p>
+
 ```sh
 # Machine A — capture the environment that already works
 dsh-stack export --profile web --name "research-workbench"
@@ -56,22 +60,25 @@ Stackfiles may also be loaded directly over HTTPS:
 dsh-stack plan https://example.com/research.dsh-stack.json --profile research
 ```
 
-## Install from GitHub
+## Install
 
-The current release is installed from source:
+Install the CLI and add the bundle to a Harness profile:
 
 ```sh
-git clone https://github.com/weivwang/dsh-stack.git
-cd dsh-stack
-pnpm install --ignore-scripts
-pnpm run build
-
-# Expose the CLI, then add the Harness bundle to a profile
-npm link
-dsh plugin --profile web add "$PWD"
+npm install --global dsh-stack
+dsh plugin --profile web add dsh-stack
 ```
 
 The package contains prebuilt JavaScript and has no install-time lifecycle script.
+
+Try the published example without cloning this repository:
+
+```sh
+dsh-stack inspect https://raw.githubusercontent.com/weivwang/dsh-stack/main/examples/web.dsh-stack.json
+dsh-stack plan https://raw.githubusercontent.com/weivwang/dsh-stack/main/examples/web.dsh-stack.json --profile web-copy
+```
+
+To install from source instead, clone the repository, run `pnpm install --ignore-scripts && pnpm run build`, then use `npm link` and `dsh plugin --profile web add "$PWD"`.
 
 ## Review first, mutate second
 

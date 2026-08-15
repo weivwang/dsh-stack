@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/hero.svg" alt="dsh-stack — 交付环境，而不是安装说明" width="100%">
+  <img src="https://raw.githubusercontent.com/weivwang/dsh-stack/main/assets/hero.svg" alt="dsh-stack — 交付环境，而不是安装说明" width="100%">
 </p>
 
 <h1 align="center">dsh-stack</h1>
@@ -36,6 +36,10 @@
 
 ## 从可用环境到经过验证的副本
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/weivwang/dsh-stack/main/assets/demo.gif" alt="使用 dsh-stack 安装、导出、检查、计划、应用并验证 profile" width="100%">
+</p>
+
 ```sh
 # 机器 A：捕获已经调顺的环境
 dsh-stack export --profile web --name "research-workbench"
@@ -56,22 +60,25 @@ Stackfile 也可以直接通过 HTTPS 使用：
 dsh-stack plan https://example.com/research.dsh-stack.json --profile research
 ```
 
-## 从 GitHub 安装
+## 安装
 
-当前版本从源码安装：
+安装 CLI，并把 bundle 加入 Harness profile：
 
 ```sh
-git clone https://github.com/weivwang/dsh-stack.git
-cd dsh-stack
-pnpm install --ignore-scripts
-pnpm run build
-
-# 暴露 CLI，然后把 bundle 加入 Harness profile
-npm link
-dsh plugin --profile web add "$PWD"
+npm install --global dsh-stack
+dsh plugin --profile web add dsh-stack
 ```
 
-仓库中已经包含构建产物，并且没有安装期 lifecycle script。
+package 已包含构建产物，并且没有安装期 lifecycle script。
+
+无需 clone 仓库即可检查公开示例：
+
+```sh
+dsh-stack inspect https://raw.githubusercontent.com/weivwang/dsh-stack/main/examples/web.dsh-stack.json
+dsh-stack plan https://raw.githubusercontent.com/weivwang/dsh-stack/main/examples/web.dsh-stack.json --profile web-copy
+```
+
+如需从源码安装：clone 仓库，运行 `pnpm install --ignore-scripts && pnpm run build`，然后执行 `npm link` 和 `dsh plugin --profile web add "$PWD"`。
 
 ## 先审阅，再写入
 

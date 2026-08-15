@@ -45,7 +45,7 @@
     "dsh-stack": "./lib/cli.js"
   },
   "files": [
-    "assets/**/*.svg",
+    "examples/**/*.json",
     "lib/**/*.js",
     "lib/**/*.d.ts",
     "cordis.patch.yml",
