@@ -19,7 +19,7 @@ interface CommonOptions {
 export async function runCli(argv = process.argv): Promise<number> {
   const program = new Command()
     .name('dsh-stack')
-    .description('Portable, secret-safe, review-first profiles for DeepSeek Harness')
+    .description('Reproducible DeepSeek Harness environments in one portable, secret-safe Stackfile')
     .version('0.1.0')
     .showSuggestionAfterError()
 

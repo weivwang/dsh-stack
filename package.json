@@ -1,14 +1,16 @@
 {
   "name": "dsh-stack",
   "version": "0.1.0",
-  "description": "Portable, secret-safe, review-first profiles for DeepSeek Harness",
+  "description": "Reproducible DeepSeek Harness environments in one portable, secret-safe Stackfile",
   "keywords": [
     "deepseek",
     "deepseek-harness",
     "dsh",
     "dsh-plugin",
     "agent",
+    "environment",
     "profile",
+    "reproducible",
     "stackfile"
   ],
   "license": "MIT",
