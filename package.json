@@ -12,6 +12,14 @@
     "stackfile"
   ],
   "license": "MIT",
+  "homepage": "https://github.com/weivwang/dsh-stack#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/weivwang/dsh-stack.git"
+  },
+  "bugs": {
+    "url": "https://github.com/weivwang/dsh-stack/issues"
+  },
   "sideEffects": false,
   "packageManager": "pnpm@11.7.0",
   "publishConfig": {

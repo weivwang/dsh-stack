@@ -21,7 +21,7 @@ Use that sentence consistently in the npm description, GitHub About field, catal
 ## Copy-ready catalog entry
 
 ```markdown
-- [dsh-stack](https://github.com/OWNER/dsh-stack) - Export, inspect, and safely reproduce an entire DSH profile as an integrity-checked, secret-redacted Stackfile.
+- [dsh-stack](https://github.com/weivwang/dsh-stack) - Export, inspect, and safely reproduce an entire DSH profile as an integrity-checked, secret-redacted Stackfile.
 ```
 
 ## The first three shared stacks
