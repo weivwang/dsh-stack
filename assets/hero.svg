@@ -1,0 +1,59 @@
+<svg width="1200" height="360" viewBox="0 0 1200 360" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="background" x1="54" y1="24" x2="1146" y2="336" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#07111F"/>
+      <stop offset="1" stop-color="#0D1C32"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="760" y1="84" x2="1090" y2="286" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#54E4FF"/>
+      <stop offset="1" stop-color="#6C7CFF"/>
+    </linearGradient>
+    <filter id="glow" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="18"/>
+    </filter>
+    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path d="M32 0H0V32" stroke="#A7C8FF" stroke-opacity="0.055"/>
+    </pattern>
+  </defs>
+
+  <rect x="1" y="1" width="1198" height="358" rx="28" fill="url(#background)" stroke="#213451" stroke-width="2"/>
+  <rect x="1" y="1" width="1198" height="358" rx="28" fill="url(#grid)"/>
+  <circle cx="988" cy="168" r="154" fill="#3478FF" fill-opacity="0.11" filter="url(#glow)"/>
+
+  <g font-family="Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif">
+    <text x="72" y="78" fill="#70DFFF" font-size="15" font-weight="700" letter-spacing="3.2">DEEPSEEK HARNESS · REPRODUCIBLE PROFILES</text>
+    <text x="72" y="157" fill="#F5FAFF" font-size="54" font-weight="760" letter-spacing="-1.8">Ship the environment.</text>
+    <text x="72" y="220" fill="#91A5C3" font-size="54" font-weight="680" letter-spacing="-1.8">Not the setup guide.</text>
+    <text x="74" y="280" fill="#9DB0CB" font-size="18" font-weight="500">plugins  ·  order  ·  exact versions  ·  portable config</text>
+  </g>
+
+  <g transform="translate(770 74)">
+    <path d="M157 32V226" stroke="url(#accent)" stroke-width="2" stroke-dasharray="4 8" stroke-opacity="0.72"/>
+    <path d="M149 218L157 228L165 218" stroke="#6C7CFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <g transform="translate(0 0)">
+      <rect width="314" height="58" rx="14" fill="#132B43" stroke="#2E5B78"/>
+      <circle cx="28" cy="29" r="7" fill="#54E4FF"/>
+      <text x="49" y="35" fill="#DAF7FF" font-family="Inter, ui-sans-serif, sans-serif" font-size="16" font-weight="650">plugin bundles</text>
+      <text x="270" y="35" fill="#72DCF2" font-family="ui-monospace, monospace" font-size="13">01</text>
+    </g>
+    <g transform="translate(18 70)">
+      <rect width="278" height="58" rx="14" fill="#172844" stroke="#365276"/>
+      <circle cx="28" cy="29" r="7" fill="#75B7FF"/>
+      <text x="49" y="35" fill="#E2ECFF" font-family="Inter, ui-sans-serif, sans-serif" font-size="16" font-weight="650">composition order</text>
+      <text x="234" y="35" fill="#86AEF8" font-family="ui-monospace, monospace" font-size="13">02</text>
+    </g>
+    <g transform="translate(36 140)">
+      <rect width="242" height="58" rx="14" fill="#1A2548" stroke="#414E83"/>
+      <circle cx="28" cy="29" r="7" fill="#9299FF"/>
+      <text x="49" y="35" fill="#EAEBFF" font-family="Inter, ui-sans-serif, sans-serif" font-size="16" font-weight="650">profile patch</text>
+      <text x="198" y="35" fill="#A6A9FF" font-family="ui-monospace, monospace" font-size="13">03</text>
+    </g>
+    <g transform="translate(54 210)">
+      <rect width="206" height="58" rx="14" fill="#20254B" stroke="#515286"/>
+      <circle cx="28" cy="29" r="7" fill="#72F0CB"/>
+      <text x="49" y="35" fill="#E6FFF7" font-family="Inter, ui-sans-serif, sans-serif" font-size="16" font-weight="650">Stackfile</text>
+      <path d="M171 23L178 30L190 18" stroke="#72F0CB" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+  </g>
+</svg>

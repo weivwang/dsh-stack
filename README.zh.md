@@ -1,82 +1,102 @@
-# dsh-stack
+<p align="center">
+  <img src="assets/hero.svg" alt="dsh-stack — 交付环境，而不是安装说明" width="100%">
+</p>
 
-[English](README.md) | [中文](README.zh.md)
+<h1 align="center">dsh-stack</h1>
 
-**把整套 DeepSeek Harness 变成一个可分享链接。**
+<p align="center">
+  <strong>让 Agent 环境真正可复现。</strong><br>
+  把整个 DeepSeek Harness profile——插件、顺序、版本与可移植配置——收进一份可审阅的 Stackfile。
+</p>
 
-`dsh-stack` 会把已经调顺的 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) profile 导出为一份可移植、自动脱敏、带完整性校验的 Stackfile。接收者先审阅精确变更计划，再用一条命令复现整套配置。
+<p align="center">
+  <a href="https://github.com/weivwang/dsh-stack/actions/workflows/ci.yml"><img src="https://github.com/weivwang/dsh-stack/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <img src="https://img.shields.io/badge/DeepSeek_Harness-0.1.0--rc.6-54e4ff" alt="DeepSeek Harness 0.1.0-rc.6">
+  <img src="https://img.shields.io/badge/Node.js-22.19%2B-72f0cb" alt="Node.js 22.19+">
+  <img src="https://img.shields.io/badge/license-MIT-9299ff" alt="MIT license">
+</p>
 
-它类似 Harness 世界里的 `Brewfile` 或 `Dockerfile`。
+<p align="center">中文 · <a href="README.md">English</a></p>
 
-```text
-你的 profile                         一份可分享文件
-├── 有顺序的插件 bundles             ├── 精确版本
-├── profile patch          导出      ├── 可移植 patch
-├── 本机路径               ───────>  ├── {{HOME}} 占位符
-└── 凭据                              └── 只有 secret 引用，没有 secret 值
-```
+---
 
-## 为什么这个方向有增长飞轮
+## 插件清单不等于运行环境
 
-插件市场回答“我能装什么”，`dsh-stack` 回答“究竟是哪套配置让它跑得这么好”。每一份公开 Stackfile 都会变成一个可复现的推荐方案、入门套装、基准环境、团队标准或 bug 复现环境。分享者会自然地为安装者创造入口。
+一套好用的 Harness profile，不只取决于装了哪些包。Bundle 顺序会改变组合结果，版本漂移会改变行为，而 profile patch 才真正保存了这套环境为什么好用。
 
-## 快速开始
+`dsh-stack` 捕获的是完整运行契约：
 
-从当前 checkout 安装：
+- 按组合顺序排列的插件 bundles；
+- registry 包的精确安装版本，以及固定到 commit 的 Git 来源；
+- profile 级 Cordis patch，并把本机路径转换为可移植占位符；
+- 只保存 secret 引用，不保存凭据值；
+- 来源 Harness 版本和整文件 SHA-256 完整性。
+
+结果是一份很小的 JSON Stackfile，可以和项目、Release、基准测试、团队手册或 bug 报告放在一起。任何人都能先看清它要做什么，再决定是否允许它修改 profile。
+
+## 从可用环境到经过验证的副本
 
 ```sh
+# 机器 A：捕获已经调顺的环境
+dsh-stack export --profile web --name "research-workbench"
+
+# 机器 B：先检查，再信任
+dsh-stack inspect web.dsh-stack.json
+dsh-stack plan web.dsh-stack.json --profile research
+
+# 复现环境，并通过 Harness 自身验证最终组合
+dsh-stack apply web.dsh-stack.json --profile research --yes
+```
+
+`apply` 不会在“包装完了”这里停下。它会写入声明的 bundle 顺序、注入可移植配置，再调用 `dsh --dump-config` 验证最终组合；验证失败时自动从备份恢复 profile 文件。
+
+Stackfile 也可以直接通过 HTTPS 使用：
+
+```sh
+dsh-stack plan https://example.com/research.dsh-stack.json --profile research
+```
+
+## 从 GitHub 安装
+
+当前版本从源码安装：
+
+```sh
+git clone https://github.com/weivwang/dsh-stack.git
+cd dsh-stack
 pnpm install --ignore-scripts
 pnpm run build
-dsh plugin --profile web add /absolute/path/to/dsh-stack
+
+# 暴露 CLI，然后把 bundle 加入 Harness profile
+npm link
+dsh plugin --profile web add "$PWD"
 ```
 
-发布到 npm 后，安装命令会简化为：
+仓库中已经包含构建产物，并且没有安装期 lifecycle script。
 
-```sh
-dsh plugin --profile web add dsh-stack
-```
+## 先审阅，再写入
 
-包内已经包含构建产物，没有安装期 lifecycle script。
+读取路径和写入路径拥有不同权限：
 
-导出：
+| 命令 | 修改 profile | 用途 |
+|---|:---:|---|
+| `dsh-stack inspect` | 否 | 校验完整性，并解释本地或 HTTPS Stackfile |
+| `dsh-stack plan` | 否 | 对比 Stackfile 和目标 profile |
+| `dsh-stack export` | 否 | 把已安装 profile 捕获为新文件 |
+| `dsh-stack apply` | 是 | 加锁、备份、应用、验证，并在失败时回滚 |
 
-```sh
-dsh-stack export --profile web --name "我的主力配置"
-```
+写入前，`apply` 会：
 
-在另一台机器上检查并生成计划：
+1. 校验封闭 schema 和整文件摘要；
+2. 拒绝危险 package specifier、本机路径、可变来源和内嵌 URL 凭据；
+3. 输出精确的安装、升级、排序、patch 和 secret 计划；
+4. 要求显式传入 `--yes`；
+5. 替换不同的非空 patch 前，要求第二次明确选择。
 
-```sh
-dsh-stack inspect my-stack.dsh-stack.json
-dsh-stack plan my-stack.dsh-stack.json --profile web
-```
+它不会删除目标机器独有的插件。未出现在 Stackfile 中的 bundle 会保留在声明层之后。
 
-确认计划后应用：
+## Secret 不进入文件
 
-```sh
-dsh-stack apply my-stack.dsh-stack.json --profile web --yes
-```
-
-也可以直接使用 HTTPS 上的 Stackfile，例如 GitHub raw 文件或 Gist。
-
-## 默认安全策略
-
-`apply` 刻意比 `export` 更谨慎：
-
-1. 校验整份文件的 SHA-256 完整性。
-2. 拒绝未知字段、危险包 specifier、本机路径和可变依赖来源。
-3. 任何写入前先输出 dry-run 计划。
-4. 必须显式传入 `--yes`。
-5. 目标存在不同的非空 patch 时，还必须传 `--replace-patch`；也可以用 `--skip-patch` 保留目标配置。
-6. 对 profile 加锁，并备份 manifest、patch、lockfile 与 pnpm workspace 文件。
-7. 按精确版本安装依赖、写入 bundle 顺序，再通过 `dsh --dump-config` 验证组合结果。
-8. 验证失败会恢复已备份的 profile 文件。
-
-应用 Stackfile 不会删除目标机器已有的额外插件。未出现在 Stackfile 中的 bundle 会保留在共享 stack 的有序层之后。
-
-## Secret 与路径脱敏
-
-导出器会把 `cordis.patch.yml` 当作数据解析；`!!js` 只保留，不执行。常见敏感字段（API key、token、password、authorization、private key、cookie、webhook URL 等）和可识别 token 字面量会被替换：
+导出器把 `cordis.patch.yml` 当作数据解析，绝不执行 `!!js`。常见凭据字段和可识别 token 字面量会变成由环境变量提供的占位符：
 
 ```yaml
 apiKey: "{{DSH_STACK_SECRET:API_KEY}}"
@@ -84,33 +104,47 @@ cacheDir: "{{DSH_HOME}}/cache"
 workspace: "{{HOME}}/code"
 ```
 
-Stackfile 只记录需要的环境变量名和已脱敏 YAML 路径。接收者在应用前注入：
+`inspect` 会列出所有必需变量；只在接收机器上提供它们：
 
 ```sh
 export DSH_STACK_SECRET_API_KEY='...'
 dsh-stack apply team.dsh-stack.json --profile web --yes
 ```
 
-自动检测是纵深防御，不是绝对保证。插件作者可能使用新的凭据格式或普通名称保存 secret；公开前仍应人工检查 Stackfile。更好的做法是使用 DSH 的凭据管理或环境变量引用，让 secret 从一开始就不进入 patch。
+自动检测属于纵深防御，不能证明任意配置绝对不含 secret。公开前仍应检查 Stackfile；更好的做法是使用托管凭据或环境变量引用，让原始 secret 从一开始就不进入 profile patch。
 
-## Agent 工具
+## 跨越边界的内容
 
-安装 bundle 后会增加一个只读工具 `stack_inspect`。`summary` 模式返回可移植性评分、bundle 数量和警告；`stack` 模式返回完整脱敏 JSON，Agent 再通过 DSH 原生、受权限控制的文件工具保存。插件不会在模型调用中直接写文件。
+| 会包含 | 明确不包含 |
+|---|---|
+| 有顺序的 `dsh.profile.bundles` | 会话记录 |
+| 精确 package 版本 | 凭据和 `.env` 文件 |
+| profile 级 `cordis.patch.yml` | 全局 `$DSH_HOME/cordis.patch.yml` |
+| 可移植 home 路径占位符 | 工作区文件和任意 skills |
+| Harness 版本和完整性摘要 | 整台机器的状态 |
 
-## v1 会与不会收集的内容
+Stackfile 是环境声明，不是备份归档。
 
-会收集：bundle 顺序、registry 精确版本、固定 commit 的 git 来源、Harness 版本、脱敏后的 profile patch、警告和整文件完整性。
+## Harness 工具
 
-不会收集：会话记录、凭据、`.env`、全局 `$DSH_HOME/cordis.patch.yml`、任意 skills 或工作区文件。这些内容具有不同的信任与所有权边界。
+安装 bundle 后会注册一个只读模型工具：`stack_inspect`。
+
+- `summary` 返回 bundle 数量、可移植性评分、必需 secret 和警告。
+- `stack` 返回完整、带完整性校验且已经脱敏的 JSON。
+
+工具本身不会写 Stackfile；保存返回的 JSON 仍然受到 Harness 常规文件权限控制。
 
 ## 兼容性与开发
 
-首版面向 DeepSeek Harness `0.1.0-rc.6`，Node 要求 `^22.19.0 || >=24`。Harness 尚处 developer preview，Stackfile 会记录来源版本，并在目标版本不同时警告。
+首版面向 DeepSeek Harness `0.1.0-rc.6` 和 Node.js `^22.19.0 || >=24`。Harness 尚处 developer preview；Stackfile 会记录来源版本，并在目标版本不同时给出警告。
 
 ```sh
 pnpm install --ignore-scripts
 pnpm run check
-pnpm run build
 ```
 
-详见[设计说明](docs/design.md)、[安全策略](SECURITY.md)和[发布增长手册](docs/launch.md)。MIT。
+仓库中的 `lib/` 是可安装构建产物。CI 会在 Linux、macOS 和 Windows 的 Node 22.19/24 上运行类型检查、18 个测试、生产构建与 package 检查。
+
+进一步阅读：[格式与变更设计](docs/design.md) · [安全策略](SECURITY.md)
+
+MIT

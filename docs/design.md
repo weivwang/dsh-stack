@@ -2,9 +2,9 @@
 
 ## Product thesis
 
-An ecosystem gets a package manager first and reproducible compositions second. DeepSeek Harness already makes individual bundles installable; `dsh-stack` makes a successful ordered composition portable. The format is deliberately useful without a central registry: a Stackfile in any Git repository, release asset, or HTTPS endpoint is enough.
+A profile is a composition, not a package list. DeepSeek Harness makes individual bundles installable; `dsh-stack` captures the order, resolved versions, and profile patch that determine the behavior of the complete environment. A Stackfile can live in any Git repository, release asset, or HTTPS endpoint without requiring a central service.
 
-This creates a two-sided growth loop. Maintainers distribute an opinionated working environment instead of a prose list of plugins. Recipients reproduce it without surrendering review or overwriting an existing profile blindly.
+The recipient remains in control: inspect and plan are read-only, apply is explicit, and an existing non-empty patch is never overwritten without a second confirmation boundary.
 
 ## Format choices
 

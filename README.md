@@ -1,86 +1,102 @@
-# dsh-stack
+<p align="center">
+  <img src="assets/hero.svg" alt="dsh-stack — Ship the environment, not the setup guide" width="100%">
+</p>
 
-[English](README.md) | [中文](README.zh.md)
+<h1 align="center">dsh-stack</h1>
 
-**A share button for your entire DeepSeek Harness.**
+<p align="center">
+  <strong>Make agent environments reproducible.</strong><br>
+  Capture an entire DeepSeek Harness profile—plugins, order, versions, and portable configuration—in one reviewable Stackfile.
+</p>
 
-`dsh-stack` turns a working [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) profile into one portable, secret-redacted, integrity-checked Stackfile. A teammate can inspect the file, see an exact change plan, and reproduce the stack with one command.
+<p align="center">
+  <a href="https://github.com/weivwang/dsh-stack/actions/workflows/ci.yml"><img src="https://github.com/weivwang/dsh-stack/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <img src="https://img.shields.io/badge/DeepSeek_Harness-0.1.0--rc.6-54e4ff" alt="DeepSeek Harness 0.1.0-rc.6">
+  <img src="https://img.shields.io/badge/Node.js-22.19%2B-72f0cb" alt="Node.js 22.19+">
+  <img src="https://img.shields.io/badge/license-MIT-9299ff" alt="MIT license">
+</p>
 
-Think `Brewfile` or `Dockerfile`, but for a Harness made of plugins.
+<p align="center"><a href="README.zh.md">中文</a> · English</p>
 
-```text
-your profile                         one shareable file
-├── ordered plugin bundles          ├── exact versions
-├── profile patch          export   ├── portable patch
-├── local paths            ───────> ├── {{HOME}} placeholders
-└── credentials                      └── secret references, never values
-```
+---
 
-## Why this can become infrastructure
+## A plugin list is not an environment
 
-Plugin discovery solves “what can I install?” `dsh-stack` solves the next question: “what exact setup made this work?” Every published Stackfile becomes a reproducible recommendation, starter kit, benchmark environment, team standard, or bug reproduction. The users who share a stack create the acquisition path for the users who apply it.
+A working Harness profile depends on more than the packages it contains. Bundle order changes composition. Version drift changes behavior. The profile patch carries the configuration that made the setup useful in the first place.
 
-## Quick start
+`dsh-stack` captures that complete contract:
 
-From this checkout:
+- ordered plugin bundles;
+- exact installed registry versions and commit-pinned Git sources;
+- the profile-level Cordis patch, with local paths made portable;
+- secret references instead of credential values;
+- source Harness version and whole-file SHA-256 integrity.
+
+The result is a small JSON Stackfile that can live beside a project, release, benchmark, team handbook, or bug report. Anyone can inspect it before allowing it to touch a profile.
+
+## From working profile to verified replica
 
 ```sh
+# Machine A — capture the environment that already works
+dsh-stack export --profile web --name "research-workbench"
+
+# Machine B — inspect before trusting
+dsh-stack inspect web.dsh-stack.json
+dsh-stack plan web.dsh-stack.json --profile research
+
+# Reproduce, then verify through Harness itself
+dsh-stack apply web.dsh-stack.json --profile research --yes
+```
+
+`apply` does not stop at installing packages. It writes the declared bundle order, hydrates portable configuration, and asks `dsh --dump-config` to verify the final composition. If verification fails, the profile files are restored from backup.
+
+Stackfiles may also be loaded directly over HTTPS:
+
+```sh
+dsh-stack plan https://example.com/research.dsh-stack.json --profile research
+```
+
+## Install from GitHub
+
+The current release is installed from source:
+
+```sh
+git clone https://github.com/weivwang/dsh-stack.git
+cd dsh-stack
 pnpm install --ignore-scripts
 pnpm run build
-dsh plugin --profile web add /absolute/path/to/dsh-stack
+
+# Expose the CLI, then add the Harness bundle to a profile
+npm link
+dsh plugin --profile web add "$PWD"
 ```
 
-After the package is published to npm, the install becomes:
+The package contains prebuilt JavaScript and has no install-time lifecycle script.
 
-```sh
-dsh plugin --profile web add dsh-stack
-```
+## Review first, mutate second
 
-The package ships prebuilt JavaScript and has no install-time lifecycle script.
+The read path and write path have deliberately different authority:
 
-Export your profile:
+| Command | Writes to a profile | Purpose |
+|---|:---:|---|
+| `dsh-stack inspect` | No | Validate integrity and explain a local or HTTPS Stackfile |
+| `dsh-stack plan` | No | Compare the desired stack with a target profile |
+| `dsh-stack export` | No | Capture an installed profile into a new file |
+| `dsh-stack apply` | Yes | Apply a reviewed plan with locking, backup, verification, and rollback |
 
-```sh
-dsh-stack export --profile web --name "My daily driver"
-```
+Before mutation, `apply`:
 
-Inspect and plan on another machine:
+1. validates a closed schema and the whole-file digest;
+2. rejects unsafe package specifiers, local paths, mutable sources, and embedded URL credentials;
+3. prints the exact install, update, ordering, patch, and secret plan;
+4. requires `--yes`;
+5. requires a second explicit choice before replacing a different non-empty patch.
 
-```sh
-dsh-stack inspect my-daily-driver.dsh-stack.json
-dsh-stack plan my-daily-driver.dsh-stack.json --profile web
-```
+It never removes target-only plugins. Existing bundles not named by the Stackfile remain after its declared layers.
 
-Apply only after reviewing the plan:
+## Secrets stay out of the file
 
-```sh
-dsh-stack apply my-daily-driver.dsh-stack.json --profile web --yes
-```
-
-Stackfiles also work from HTTPS, so a raw GitHub file or Gist is enough:
-
-```sh
-dsh-stack plan https://example.com/team-stack.dsh-stack.json --profile web
-```
-
-## The safe default path
-
-`apply` is deliberately harder than `export`:
-
-1. The Stackfile's SHA-256 integrity is verified.
-2. Unknown fields, unsafe package specifiers, local paths, and mutable package sources are rejected.
-3. A dry-run plan is printed before any mutation.
-4. `--yes` is mandatory.
-5. A different non-empty target patch needs an additional `--replace-patch`; `--skip-patch` is the non-destructive alternative.
-6. The profile is locked and its manifest, patch, lockfile, and pnpm workspace file are backed up.
-7. Dependencies are installed at exact versions, the bundle order is written, and the profile is verified with `dsh --dump-config`.
-8. A failed verification restores the backed-up profile files.
-
-The apply operation never removes extra installed plugins. Existing bundles not named by the Stackfile stay after the shared stack's ordered layers.
-
-## Secret and path portability
-
-The exporter parses `cordis.patch.yml` as data. It preserves but never evaluates `!!js` expressions. It replaces values under common sensitive keys (`apiKey`, `token`, `password`, `authorization`, private keys, cookies, webhook URLs, and related camel/snake-case names) and recognizable token literals with placeholders:
+The exporter parses `cordis.patch.yml` as data and never evaluates `!!js`. Common credential fields and recognizable token literals become environment-backed placeholders:
 
 ```yaml
 apiKey: "{{DSH_STACK_SECRET:API_KEY}}"
@@ -88,55 +104,47 @@ cacheDir: "{{DSH_HOME}}/cache"
 workspace: "{{HOME}}/code"
 ```
 
-The Stackfile stores only the required variable name and redacted YAML path. The recipient hydrates the value at apply time:
+`inspect` lists every required variable. Supply the values only on the receiving machine:
 
 ```sh
 export DSH_STACK_SECRET_API_KEY='...'
 dsh-stack apply team.dsh-stack.json --profile web --yes
 ```
 
-Secret detection is defense in depth, not magic. A maintainer may invent a credential format or an innocent-looking key name the exporter does not know. Always inspect a Stackfile before publishing it. Prefer DSH's managed credentials or environment references so secrets never enter `cordis.patch.yml` in the first place.
+Automatic detection is defense in depth, not proof that arbitrary configuration is secret-free. Inspect a Stackfile before publishing it, and prefer managed credentials or environment references so raw secrets never enter the profile patch.
 
-## Commands
+## What crosses the boundary
 
-| Command | Purpose |
+| Included | Deliberately excluded |
 |---|---|
-| `dsh-stack export` | Export an installed profile, exact package versions, and an optional portable patch |
-| `dsh-stack inspect` | Verify integrity and summarize a local or HTTPS Stackfile |
-| `dsh-stack plan` | Compare a Stackfile with a target profile without writing anything |
-| `dsh-stack apply` | Apply a reviewed plan with lock, backup, verification, and rollback |
+| Ordered `dsh.profile.bundles` | Session history |
+| Exact package versions | Credentials and `.env` files |
+| Profile-level `cordis.patch.yml` | Global `$DSH_HOME/cordis.patch.yml` |
+| Portable home-path placeholders | Workspace files and arbitrary skills |
+| Harness version and integrity digest | Machine-wide state |
 
-Use `dsh-stack <command> --help` for every option.
+A Stackfile is an environment declaration, not a backup archive.
 
-## Agent tool
+## Harness tool
 
-Installing the bundle adds one read-only model tool, `stack_inspect`. In `summary` mode it reports portability, bundle counts, and warnings. In `stack` mode it returns the complete secret-redacted JSON so the agent can save it using DSH's ordinary, permission-governed file tools. The plugin itself never writes a Stackfile from a model call.
+Installing the bundle registers one read-only model tool: `stack_inspect`.
 
-## What v1 captures
+- `summary` returns bundle counts, portability score, required secrets, and warnings.
+- `stack` returns the complete integrity-sealed, secret-redacted JSON.
 
-- Ordered `dsh.profile.bundles`
-- Exact installed versions for registry packages
-- Commit-pinned git sources
-- Harness version metadata
-- The profile-level `cordis.patch.yml`, with secret and home placeholders
-- Export warnings and whole-file integrity
+The tool itself never writes a Stackfile. Saving the returned JSON remains subject to Harness's ordinary file permissions.
 
-It intentionally does not copy session history, credentials, `.env` files, global `$DSH_HOME/cordis.patch.yml`, arbitrary skills, or workspace files. Those are different trust and ownership domains.
+## Compatibility and development
 
-## Compatibility
-
-The first release targets DeepSeek Harness `0.1.0-rc.6` and Node `^22.19.0 || >=24`. Harness is in developer preview and may make breaking changes; the Stackfile records the source Harness version and warns when the target differs.
-
-## Development
+The first release targets DeepSeek Harness `0.1.0-rc.6` and Node.js `^22.19.0 || >=24`. Harness is in developer preview; each Stackfile records its source version and warns when the target differs.
 
 ```sh
 pnpm install --ignore-scripts
 pnpm run check
-pnpm run build
 ```
 
-The source is TypeScript, the checked-in `lib/` directory is the installable artifact, and the test suite covers redaction, integrity, export, planning, successful application, and rollback.
+The checked-in `lib/` directory is the installable artifact. CI runs type checking, 18 tests, a production build, and package inspection across Linux, macOS, and Windows on Node 22.19 and 24.
 
-See [the design note](docs/design.md), [security policy](SECURITY.md), and [launch playbook](docs/launch.md) for the decisions behind the format, mutation model, and adoption loop.
+Read the [format and mutation design](docs/design.md) or the [security policy](SECURITY.md).
 
 MIT
