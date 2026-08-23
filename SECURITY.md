@@ -9,7 +9,7 @@ Do not include real credentials in a report. Use synthetic tokens that match the
 ## Security boundaries
 
 - `inspect`, `plan`, and the `stack_inspect` model tool do not install packages or evaluate Cordis `!!js` expressions.
-- Remote Stackfiles must use HTTPS and are size bounded.
+- Remote Stackfiles must use HTTPS; their decoded response bodies are size bounded while streaming and oversized downloads are cancelled.
 - Stackfile validation rejects unknown fields, unsafe package names and specifiers, embedded URL credentials, and integrity mismatches.
 - `apply` requires explicit confirmation, backs up profile-owned files, verifies the composed configuration, and restores those files on failure.
 - Secret redaction covers common keys and recognizable token formats but cannot prove that arbitrary configuration contains no secret. Authors must review exported files.

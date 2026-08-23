@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Enforce the remote Stackfile byte limit while streaming the response body and cancel oversized downloads immediately.
+
 ## 0.1.0 - 2026-08-15
 
 - Introduce Stackfile v1 with canonical SHA-256 integrity.
